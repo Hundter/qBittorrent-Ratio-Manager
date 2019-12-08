@@ -5,8 +5,42 @@ import sys
 import argparse
 import os
 import json
+from jsonschema import validate
+from jsonschema import ValidationError
 from resources.CategoryProfile import CategoryProfile
 from resources.QBitController import QBitController
+
+
+qman_schema = {
+    "type" : "object",
+    "properties" : {
+        "category" : {"type" : "string"},
+        "public" : {
+            "type" : "object",
+            "properties" : {
+                "min_seed_ratio": {"type" : "number"},
+                "max_seed_ratio": {"type" : "number"},
+                "min_seed_time": {"type" : "integer"},
+                "max_seed_time": {"type" : "integer"}
+            },
+            "required": ["min_seed_ratio", "max_seed_ratio", "min_seed_time", "max_seed_time"]
+        },
+        "private" : {
+            "type" : "object",
+            "properties" : {
+                "min_seed_ratio": {"type" : "number"},
+                "max_seed_ratio": {"type" : "number"},
+                "min_seed_time": {"type" : "integer"},
+                "max_seed_time": {"type" : "integer"}
+            },
+            "required": ["min_seed_ratio", "max_seed_ratio", "min_seed_time", "max_seed_time"]
+        },
+        "tracker" : {"type" : "string"},
+        "delete_files" : {"type" : "boolean"},
+        "custom_delete_files_path" : {"type" : "string"}
+    },
+    "required": ["category", "public", "private", "delete_files"]
+}
 
 
 def load_category_files_into_classes(args):
@@ -19,62 +53,31 @@ def load_category_files_into_classes(args):
         with open(args.config_folder + "/" + file) as json_file:
             settings = json.load(json_file)
 
-        if 'category' not in settings:
-            continue
+        try:
+            validate(instance=settings, schema=qman_schema)
+        except ValidationError as e:
+            print("Failed to load '" + file + "'...\n*** " + e.message + " ***\n.qman example files can be found here: aaa")
+            sys.exit(1)
 
-        category = settings['category']
-        tracker = settings['tracker'] if 'tracker' in settings else ""
+        # Set default values
+        if 'tracker' not in settings: settings['tracker'] = ""
+        if 'custom_delete_files_path' not in settings: settings['custom_delete_files_path'] = ""
 
-        settings_public = settings['public'] if 'public' in settings else {}
-        public = {}
-        public['min_seed_ratio'] = settings_public['min_ratio_public'] if 'min_ratio_public' in settings_public else args.min_ratio_public_global
-        public['max_seed_ratio'] = settings_public['max_ratio_public'] if 'max_ratio_public' in settings_public else args.max_ratio_public_global
-        public['min_seed_time'] = settings_public['min_seed_time'] if 'min_seed_time' in settings_public else args.min_seed_time_public_global
-        public['max_seed_time'] = settings_public['max_seed_time'] if 'max_seed_time' in settings_public else args.max_seed_time_public_global
+        # Verify path availability
+        if settings['custom_delete_files_path']:
+            if not os.path.isdir(settings['custom_delete_files_path']):
+                print("Error while parsing '" + file + "'. custom_delete_files_path: specified path is not a valid directory")
+                sys.exit(1)
+            settings['delete_files'] = False # Override delete_files if custom_delete_files_path is set
 
-        settings_private = settings['private'] if 'private' in settings else {}
-        private = {}
-        private['min_seed_ratio'] = settings_private['min_ratio_public'] if 'min_ratio_public' in settings_private else args.min_ratio_private_global
-        private['max_seed_ratio'] = settings_private['max_ratio_public'] if 'max_ratio_public' in settings_private else args.max_ratio_private_global
-        private['min_seed_time'] = settings_private['min_seed_time'] if 'min_seed_time' in settings_private else args.min_seed_time_private_global
-        private['max_seed_time'] = settings_private['max_seed_time'] if 'max_seed_time' in settings_private else args.max_seed_time_private_global
-
-        categoryProfile = CategoryProfile(category, tracker, args.delete_files, public, private)
-
+        categoryProfile = CategoryProfile(settings['category'], settings['tracker'], settings['delete_files'], settings['custom_delete_files_path'], settings['public'], settings['private'])
         categoryProfiles.append(categoryProfile)
 
     return categoryProfiles
 
 
 def construct_argument_parser():
-    parser = argparse.ArgumentParser(description='https://github.com/Hundter/qBittorrent-Ratio-Manager Reads .qman files for JSON settings on when to delete torrents from a qBittorrent client (Global default settings do not overwrite settings in files!)', usage="%(prog)s [options]", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-    parser.add_argument('--delete_files',
-                    help='Delete files when removing them from qBittorrent', action='store_true')
-
-    parser.add_argument('--min_ratio_public_global', default=2, metavar='',
-                    help='Set the global default minimum ratio for public torrents.')
-
-    parser.add_argument('--max_ratio_public_global', default=10000, metavar='',
-                    help='Set the global default maximum ratio for public torrents.')
-
-    parser.add_argument('--min_seed_time_public_global', default=1, metavar='',
-                    help='Set the global default minimum seed time in hours for public torrents.')
-
-    parser.add_argument('--max_seed_time_public_global', default=960, metavar='',
-                    help='Set the global default maximum seed time in hours for public torrents.')
-
-    parser.add_argument('--min_ratio_private_global', default=2, metavar='',
-                    help='Set the global default minimum ratio for private torrents.')
-
-    parser.add_argument('--max_ratio_private_global', default=10000, metavar='',
-                    help='Set the global default maximum ratio for private torrents.')
-
-    parser.add_argument('--min_seed_time_private_global', default=480, metavar='',
-                    help='Set the global default minimum seed time in hours for private torrents.')
-
-    parser.add_argument('--max_seed_time_private_global', default=960, metavar='',
-                    help='Set the global default maximum seed time in hours for private torrents.')
+    parser = argparse.ArgumentParser(description='https://github.com/Hundter/qBittorrent-Ratio-Manager Reads .qman files for JSON settings on when and how to delete torrents from a qBittorrent client', usage="%(prog)s [options]", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('--url', default="http://127.0.0.1:8080/api/v2/", dest="qbit_url", metavar='',
                     help='Set the qbit API url and path, most likely ends in /api/v2/')
@@ -104,7 +107,7 @@ if __name__ == "__main__":
     torrents_checked = set()
     for categoryProfile in categoryProfiles:
         categoryProfile.process_category()
-        delete_counter += len(categoryProfile.torrent_hashes_to_delete)
+        delete_counter += len(categoryProfile.torrents_to_delete)
         torrents_checked = torrents_checked.union(categoryProfile.torrents_checked)
 
     print("Checked " + str(len(torrents_checked)) + " torrents!")

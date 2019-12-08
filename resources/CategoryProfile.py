@@ -6,14 +6,25 @@ import resources.Helper as Helper
 
 class CategoryProfile:
 
-    def __init__(self, category, tracker, delete_files, public_settings_array, private_settings_array):
+    def __init__(self, category, tracker, delete_files, custom_delete_files_path, public_settings_array, private_settings_array):
         self.category = category
         self.tracker = tracker
         self.delete_files = delete_files
+        self.custom_delete_files_path = custom_delete_files_path
         self.public = public_settings_array
         self.private = private_settings_array
-        self.torrent_hashes_to_delete = []
+        self.torrents_to_delete = {}
         self.torrents_checked = set()
+
+    def delete_files_directly(self):
+        for torrent_path in self.torrents_to_delete.values():
+            full_path = self.custom_delete_files_path + "/" + torrent_path
+            if os.path.isfile(full_path):
+                os.remove(full_path)
+            elif os.path.isdir(full_path):
+                shutil.rmtree(full_path)
+            else:
+                print("Could not find path or file: " + full_path)
 
     def should_torrent_be_deleted(self, torrent_hash):
         torrent_properties = QBitController.get_torrent_properties(torrent_hash)
@@ -45,7 +56,10 @@ class CategoryProfile:
                 continue
 
             if self.should_torrent_be_deleted(torrent['hash']):
-                self.torrent_hashes_to_delete.append(torrent['hash'])
+                self.torrents_to_delete[torrent['hash']] = torrent['name']
 
-        if self.torrent_hashes_to_delete:
-            QBitController.remove_torrent_hashes(self.torrent_hashes_to_delete, self.delete_files)
+        if self.torrents_to_delete:
+            QBitController.remove_torrent_hashes(self.torrents_to_delete.keys(), self.delete_files)
+
+            if self.custom_delete_files_path:
+                self.delete_files_directly()
