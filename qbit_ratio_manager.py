@@ -5,6 +5,7 @@ import sys
 import argparse
 import os
 import json
+import logging
 from jsonschema import validate
 from jsonschema import ValidationError
 from resources.CategoryProfile import CategoryProfile
@@ -91,6 +92,8 @@ def construct_argument_parser():
     parser.add_argument('--config_folder', default=os.path.dirname(os.path.realpath(__file__)) + "/configs/", metavar='',
                     help='Set the folder for category config files.')
 
+    parser.add_argument('--verbose', '-v', default=0, dest="verbose", help='Set the verbosity level. 0 = only warnings, 1 = info, 2 = debug.', action='count')
+
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -98,6 +101,10 @@ if __name__ == "__main__":
 
     if not args.qbit_url.startswith("http://") and not args.qbit_url.startswith("https://"):
         args.qbit_url = "http://" + args.qbit_url
+
+    levels = [logging.WARNING, logging.INFO, logging.DEBUG]
+    level = levels[min(2, args.verbose)]
+    logging.basicConfig(level=level)
 
     QBitController.connect_to_qbit(args.qbit_url, args.qbit_username, args.qbit_password)
 

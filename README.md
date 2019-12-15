@@ -25,6 +25,7 @@ pip3 install jsonschema requests
 |--username       |The username for the qBittorrent WebUI login|
 |--password       |The password for the qBittorrent WebUI login|
 |--config_folder  |Path to where the .qman files are stored. By default this is: (folder of the script)/config/|
+|--verbose -v     |The verbosity level. 0 = warnings, 1 = info, 2 = debug. Default is 0|
 
 ## .qman config file explanation
 The config files are in JSON and the file extensions have to be .qman
