@@ -21,10 +21,11 @@ pip3 install jsonschema requests
 ## Command line reference
 |Argument         |Explanation|
 |---              |:-:|
-|--url            |The url to the qBittorrent api. Ends in /api/v2/ unless you have a reverse proxy or similar.<br> (you probably know if it's different for you)|
+|--url            |The url to the qBittorrent api. Ends in /api/v2/ unless you have a reverse proxy or similar.<br> (you probably know if it's different for you) <br> Default is http://127.0.0.1:8080/api/v2|
 |--username       |The username for the qBittorrent WebUI login|
 |--password       |The password for the qBittorrent WebUI login|
 |--config_folder  |Path to where the .qman files are stored. By default this is: (folder of the script)/config/|
+|--verbose -v     |The verbosity level. 0 = only warnings, 1 = info, 2 = debug. Default is 0|
 
 ## .qman config file explanation
 The config files are in JSON and the file extensions have to be .qman

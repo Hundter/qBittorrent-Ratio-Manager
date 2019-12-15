@@ -1,5 +1,6 @@
 import os
 import shutil
+import logging
 from resources.QBitController import QBitController
 import resources.Helper as Helper
 
@@ -49,6 +50,8 @@ class CategoryProfile:
         if not torrents:
             return
 
+        logging.info('Checking {} torrents for {}'.format(len(torrents), self.category))
+
         for torrent in torrents:
             self.torrents_checked.add(torrent['hash'])
 
@@ -59,6 +62,10 @@ class CategoryProfile:
                 self.torrents_to_delete[torrent['hash']] = torrent['name']
 
         if self.torrents_to_delete:
+            logging.info('Deleting following torrents from the {} category'.format(self.category))
+            for name in self.torrents_to_delete:
+                logging.info(name)
+
             QBitController.remove_torrent_hashes(self.torrents_to_delete.keys(), self.delete_files)
 
             if self.custom_delete_files_path:
