@@ -63,7 +63,7 @@ class CategoryProfile:
 
         if self.torrents_to_delete:
             logging.info('Deleting following torrents from the {} category'.format(self.category))
-            for name in self.torrents_to_delete:
+            for name in self.torrents_to_delete.values():
                 logging.info(name)
 
             QBitController.remove_torrent_hashes(self.torrents_to_delete.keys(), self.delete_files)
