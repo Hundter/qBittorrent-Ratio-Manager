@@ -22,7 +22,8 @@ qman_schema = {
                 "min_seed_ratio": {"type" : "number"},
                 "max_seed_ratio": {"type" : "number"},
                 "min_seed_time": {"type" : "integer"},
-                "max_seed_time": {"type" : "integer"}
+                "max_seed_time": {"type" : "integer"},
+                "required_seeders" : {"type" : "integer"}
             },
             "required": ["min_seed_ratio", "max_seed_ratio", "min_seed_time", "max_seed_time"]
         },
@@ -32,7 +33,8 @@ qman_schema = {
                 "min_seed_ratio": {"type" : "number"},
                 "max_seed_ratio": {"type" : "number"},
                 "min_seed_time": {"type" : "integer"},
-                "max_seed_time": {"type" : "integer"}
+                "max_seed_time": {"type" : "integer"},
+                "required_seeders" : {"type" : "integer"}
             },
             "required": ["min_seed_ratio", "max_seed_ratio", "min_seed_time", "max_seed_time"]
         },
@@ -63,6 +65,8 @@ def load_category_files_into_classes(args):
         # Set default values
         if 'tracker' not in settings: settings['tracker'] = ""
         if 'custom_delete_files_path' not in settings: settings['custom_delete_files_path'] = ""
+        if 'required_seeders' not in settings['public']: settings['public']['required_seeders'] = -1
+        if 'required_seeders' not in settings['private']: settings['private']['required_seeders'] = -1
 
         # Verify path availability
         if settings['custom_delete_files_path']:

@@ -37,6 +37,9 @@ class CategoryProfile:
 
         limit_array = self.private if Helper.is_torrent_private(torrent_trackers) else self.public
 
+        if limit_array['required_seeders'] > (torrent_properties['seeds_total'] - 1):
+            return False
+
         if (torrent_properties['share_ratio'] >= limit_array['max_seed_ratio']) or (torrent_seeding_time_in_hours >= limit_array["max_seed_time"]):
             return True
 
