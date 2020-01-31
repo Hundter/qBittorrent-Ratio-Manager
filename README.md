@@ -47,13 +47,15 @@ Multiple .qman files for the same category is allowed but should only be used in
         "min_seed_ratio": 2,
         "max_seed_ratio": 10000,
         "min_seed_time": 1,
-        "max_seed_time": 960
+        "max_seed_time": 960,
+        "required_seeders": 1 # Optional, remove unless needed
     },
     "private": {
         "min_seed_ratio": 2,
         "max_seed_ratio": 10000,
         "min_seed_time": 480,
-        "max_seed_time": 960
+        "max_seed_time": 960,
+        "required_seeders": 1 # Optional, remove unless needed
     },
     "delete_files": false,
     "custom_delete_files_path": "/home/hundter/downloads" # Optional, remove unless needed
@@ -72,6 +74,7 @@ Line by line explanation:
 |max_seed_ratio|The maximum share ratio to reach before deletion, regardless of minimum settings|
 |min_seed_time|The minimum time to seed in hours before deletion. Only deletes if both minimum settings are satisfied. Only use whole numbers!|
 |max_seed_time|The maximum time to seed in hours before deletion, regardless of minimum settings. Only use whole numbers!|
+|required_seeders|Only delete torrent if it has at least this many seeders excluding yourself, to avoid killing dying torrents. Overrides max settings.|
 |private|The settings for private torrents|
 |delete_files|Whether qBittorrent should remove the files after deleting the torrent|
 |custom_delete_files_path|Optional. A path to the category download location. Program then uses filesystem deletion directly instead of having qBittorrent delete the files. If the torrent is a folder it removes the folder regardless of any files in it. Overrides "delete_files" (Only use this if you understand what it does, you most likely don't need it)|
