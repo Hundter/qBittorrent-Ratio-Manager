@@ -39,6 +39,8 @@ Multiple .qman files for the same category is allowed but should only be used in
 
 
 .qman example:
+
+REMOVE COMMENTS FROM EXAMPLE BEFORE USING
 ```
 {
     "category": "test",
