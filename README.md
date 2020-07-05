@@ -69,7 +69,7 @@ Line by line explanation:
 
 |Argument|Explanation|
 |---|:-:|
-|category|The name of the qBittorrent category that this .qman file applies to|
+|category|The name of the qBittorrent category that this .qman file applies to. "\*" can be used to apply to all categories that don't already have rules set from a different .qman file|
 |tracker|Optional. Full tracker hostname, including subdomain if any (see example).<br>Only scans torrents that match both the category and tracker setting|
 |public|The settings for public torrents|
 |min_seed_ratio|The minimum share ratio to reach before deletion. Only deletes if both minimum settings are satisfied|
