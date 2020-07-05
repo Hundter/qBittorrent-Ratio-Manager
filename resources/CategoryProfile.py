@@ -15,7 +15,6 @@ class CategoryProfile:
         self.public = public_settings_array
         self.private = private_settings_array
         self.torrents_to_delete = {}
-        self.torrents_checked = set()
 
     def delete_files_directly(self):
         for torrent_path in self.torrents_to_delete.values():
@@ -48,22 +47,16 @@ class CategoryProfile:
 
         return False
 
-    def process_category(self):
-        torrents = QBitController.get_torrents_by_category(self.category)
-        if not torrents:
+
+    def process_torrent(self, torrent):
+        if torrent['progress'] != 1:  # Ignore if download is not finished
             return
 
-        logging.info('Checking {} torrents for {}'.format(len(torrents), self.category))
+        if self.should_torrent_be_deleted(torrent['hash']):
+            self.torrents_to_delete[torrent['hash']] = torrent['name']
 
-        for torrent in torrents:
-            self.torrents_checked.add(torrent['hash'])
 
-            if torrent['progress'] != 1:  # Ignore if download is not finished
-                continue
-
-            if self.should_torrent_be_deleted(torrent['hash']):
-                self.torrents_to_delete[torrent['hash']] = torrent['name']
-
+    def delete_torrents_to_be_deleted(self):
         if self.torrents_to_delete:
             logging.info('Deleting following torrents from the {} category'.format(self.category))
             for name in self.torrents_to_delete.values():

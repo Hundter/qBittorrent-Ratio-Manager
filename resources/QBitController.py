@@ -55,3 +55,7 @@ class QBitController:
     @staticmethod
     def get_torrents_by_category(category):
         return QBitController.get("torrents/info?category=" + category).json()
+
+    @staticmethod
+    def get_torrents():
+        return QBitController.get("torrents/info").json()

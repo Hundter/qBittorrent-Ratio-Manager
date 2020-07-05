@@ -47,7 +47,7 @@ qman_schema = {
 
 
 def load_category_files_into_classes(args):
-    categoryProfiles = []
+    categoryProfiles = {}
 
     for file in os.listdir(args.config_folder):
         if not file.endswith(".qman"):
@@ -76,7 +76,7 @@ def load_category_files_into_classes(args):
             settings['delete_files'] = False # Override delete_files if custom_delete_files_path is set
 
         categoryProfile = CategoryProfile(settings['category'], settings['tracker'], settings['delete_files'], settings['custom_delete_files_path'], settings['public'], settings['private'])
-        categoryProfiles.append(categoryProfile)
+        categoryProfiles[settings['category']] = categoryProfile
 
     return categoryProfiles
 
@@ -114,12 +114,21 @@ if __name__ == "__main__":
 
     categoryProfiles = load_category_files_into_classes(args)
 
+    torrents = QBitController.get_torrents()
+
     delete_counter = 0
     torrents_checked = set()
-    for categoryProfile in categoryProfiles:
-        categoryProfile.process_category()
+    for torrent in torrents:
+        if torrent["category"] in categoryProfiles.keys():
+            categoryProfiles[torrent["category"]].process_torrent(torrent)
+            torrents_checked.add(torrent['hash'])
+        elif "*" in categoryProfiles.keys():
+            categoryProfiles["*"].process_torrent(torrent)
+            torrents_checked.add(torrent['hash'])
+
+    for categoryProfile in categoryProfiles.values():
+        categoryProfile.delete_torrents_to_be_deleted()
         delete_counter += len(categoryProfile.torrents_to_delete)
-        torrents_checked = torrents_checked.union(categoryProfile.torrents_checked)
 
     print("Checked " + str(len(torrents_checked)) + " torrents!")
     print("Deleted " + str(delete_counter) + " torrents!")
