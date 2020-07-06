@@ -76,7 +76,10 @@ def load_category_files_into_classes(args):
             settings['delete_files'] = False # Override delete_files if custom_delete_files_path is set
 
         categoryProfile = CategoryProfile(settings['category'], settings['tracker'], settings['delete_files'], settings['custom_delete_files_path'], settings['public'], settings['private'])
-        categoryProfiles[settings['category']] = categoryProfile
+
+        if settings['category'] not in categoryProfiles:
+            categoryProfiles[settings['category']] = []
+        categoryProfiles[settings['category']].append(categoryProfile)
 
     return categoryProfiles
 
@@ -120,15 +123,18 @@ if __name__ == "__main__":
     torrents_checked = set()
     for torrent in torrents:
         if torrent["category"] in categoryProfiles.keys():
-            categoryProfiles[torrent["category"]].process_torrent(torrent)
+            for matchingCategoryProfile in categoryProfiles[torrent["category"]]:
+                matchingCategoryProfile.process_torrent(torrent)
             torrents_checked.add(torrent['hash'])
         elif "*" in categoryProfiles.keys():
-            categoryProfiles["*"].process_torrent(torrent)
+            for matchingCategoryProfile in categoryProfiles["*"]:
+                matchingCategoryProfile.process_torrent(torrent)
             torrents_checked.add(torrent['hash'])
 
-    for categoryProfile in categoryProfiles.values():
-        categoryProfile.delete_torrents_to_be_deleted()
-        delete_counter += len(categoryProfile.torrents_to_delete)
+    for categoryProfileArray in categoryProfiles.values():
+        for categoryProfile in categoryProfileArray:
+            categoryProfile.delete_torrents_to_be_deleted()
+            delete_counter += len(categoryProfile.torrents_to_delete)
 
     print("Checked " + str(len(torrents_checked)) + " torrents!")
     print("Deleted " + str(delete_counter) + " torrents!")

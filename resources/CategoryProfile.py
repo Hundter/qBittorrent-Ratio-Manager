@@ -28,6 +28,11 @@ class CategoryProfile:
 
     def should_torrent_be_deleted(self, torrent_hash):
         torrent_properties = QBitController.get_torrent_properties(torrent_hash)
+
+        # Torrent was not found, perhaps it was already deleted by a different ruleset
+        if torrent_properties == False:
+            return False
+
         torrent_seeding_time_in_hours = (torrent_properties['seeding_time'] / 60 / 60)
         torrent_trackers  = QBitController.get_torrent_trackers(torrent_hash)
 

@@ -38,7 +38,10 @@ class QBitController:
 
     @staticmethod
     def get_torrent_properties(torrent_hash):
-        return QBitController.get("torrents/properties?hash=" + torrent_hash).json()
+        result = QBitController.get("torrents/properties?hash=" + torrent_hash)
+        if result.status_code == 404:
+            return False
+        return result.json()
 
     @staticmethod
     def get_torrent_trackers(torrent_hash):
