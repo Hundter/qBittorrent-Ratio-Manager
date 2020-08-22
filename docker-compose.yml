@@ -1,9 +1,11 @@
 version: '3.7'
-services: 
+services:
   app:
     build: .
     environment:
       - "QBIT_URL=http://127.0.0.1:8080/api/v2/"
       - "QBIT_USERNAME="
       - "QBIT_PASSWORD="
-      - VERBOSITY=0    
+      - VERBOSITY=0
+    volumes:
+      - "./config:/config"
