@@ -1,6 +1,7 @@
 import os
 import shutil
 import logging
+import pathlib
 from resources.QBitController import QBitController
 import resources.Helper as Helper
 
@@ -58,7 +59,12 @@ class CategoryProfile:
             return
 
         if self.should_torrent_be_deleted(torrent['hash']):
-            self.torrents_to_delete[torrent['hash']] = torrent['name']
+            path = pathlib.PurePath(torrent['content_path'])
+            torrent_path = path.name
+            if not torrent_path:
+                print("Could not extract path for torrent: " + torrent['name'])
+                return
+            self.torrents_to_delete[torrent['hash']] = torrent_path
 
 
     def delete_torrents_to_be_deleted(self):
